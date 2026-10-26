@@ -40,6 +40,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import android.view.SoundEffectConstants
 import androidx.compose.ui.platform.LocalView
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 private val AzulSmartCalc = Color(0xFF3264E8)
 private val AzulOscuro = Color(0xFF19365D)
@@ -155,6 +159,9 @@ fun PantallaInicio(onInicio: () -> Unit) {
 @Composable
 fun PantallaCalculadora(onSalir: () -> Unit) {
     val vista = LocalView.current
+    val configuracion = LocalConfiguration.current
+    val esHorizontal =
+        configuracion.orientation == Configuration.ORIENTATION_LANDSCAPE
     var modoNocturno by remember { mutableStateOf(false) }
     var menuTrigonometria by remember { mutableStateOf(false) }
     var menuFunciones by remember { mutableStateOf(false) }
@@ -177,15 +184,19 @@ fun PantallaCalculadora(onSalir: () -> Unit) {
                 if (modoNocturno) Color(0xFF121212)
                 else Fondo
             )
+
             .padding(
                 horizontal = 12.dp,
-                vertical = 90.dp),
+                vertical = 100.dp
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = "SmartCalc",
-            fontSize = 25.sp,
+            fontSize = 45.sp,
+
             fontWeight = FontWeight.Bold,
             color = if (modoNocturno) Color.White else AzulOscuro
         )
@@ -195,18 +206,20 @@ fun PantallaCalculadora(onSalir: () -> Unit) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp),
+                .height(if (esHorizontal) 48.dp else 80.dp),
             color = if (modoNocturno) Color(0xFF252525) else Color.White,
             shape = RoundedCornerShape(4.dp)
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 4.dp),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
+
+            Text(
                     text = if (teclaSeleccionada.isEmpty()) "0" else teclaSeleccionada,
                     fontSize = 34.sp,
                     color = if (modoNocturno) Color.White else AzulOscuro
@@ -304,42 +317,44 @@ fun PantallaCalculadora(onSalir: () -> Unit) {
             }
         }
         TextButton(
-            onClick = { mostrarAyuda = true }
+            onClick = {
+                mostrarAyuda = true
+                android.util.Log.d("SMARTCALC", "Botón Ayuda pulsado")
+            }
         ) {
             Text(
                 text = "Ayuda",
-                fontSize = 11.sp,
+                fontSize = 12.sp,
                 color = AzulOscuro
             )
         }
 
+
+
         if (mostrarAyuda) {
             androidx.compose.material3.AlertDialog(
-                onDismissRequest = { mostrarAyuda = false },
+                onDismissRequest = {
+                    mostrarAyuda = false
+                },
                 title = {
-                    Text("Ayuda de SmartCalc")
+                    Text("AYUDA DE SMARTCALC")
                 },
                 text = {
-                    Text(
-                        "Introduce números utilizando el teclado.\n\n" +
-                                "Utiliza los botones de operaciones básicas " +
-                                "(+, −, × y ÷) para identificar las operaciones.\n\n" +
-                                "En Trigonometría encontrarás funciones como " +
-                                "sin, cos y tan.\n\n" +
-                                "En Función encontrarás funciones científicas " +
-                                "como log, ln y n!.\n\n" +
-                                "Esta versión es una interfaz visual y no realiza cálculos."
-                    )
+                    Text("¡La ventana de ayuda funciona correctamente!")
                 },
                 confirmButton = {
                     TextButton(
-                        onClick = { mostrarAyuda = false }
+                        onClick = {
+                            mostrarAyuda = false
+                        }
                     ) {
-                        Text("ENTENDIDO")
+                        Text("CERRAR")
                     }
                 }
             )
         }
+
+
 
 
 
@@ -355,10 +370,10 @@ fun PantallaCalculadora(onSalir: () -> Unit) {
                 ) {
                     fila.forEach { tecla ->
                         val esOperador =
-                            tecla in listOf("÷", "×", "−", "+")
-                        val esIgual = tecla == "="
+                            tecla in listOf("÷", "×", "−", "+", "=")
+
                         val esCientifica =
-                            indice < 3 || tecla in listOf("10ˣ", "log", "ln")
+                            indice < 3 || tecla in listOf("xʸ", "10ˣ", "log", "ln")
 
                         Button(
                             onClick = {
@@ -375,19 +390,19 @@ fun PantallaCalculadora(onSalir: () -> Unit) {
                             ),
                             shape = RoundedCornerShape(5.dp),
                             colors = ButtonDefaults.buttonColors(
+
                                 containerColor = if (modoNocturno) {
                                     when {
-                                        esIgual -> Color(0xFF0875C9)
                                         esOperador || esCientifica -> Color(0xFF37474F)
                                         else -> Color(0xFF252525)
                                     }
                                 } else {
                                     when {
-                                        esIgual -> Color(0xFF0875C9)
                                         esOperador || esCientifica -> Color(0xFFE5F0E6)
                                         else -> Color.White
                                     }
                                 },
+
                                 contentColor = if (modoNocturno) Color.White else AzulOscuro
                             )
                         ) {
